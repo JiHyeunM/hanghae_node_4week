@@ -1,7 +1,7 @@
 const express = require("express")
 const jwt = require("jsonwebtoken")
 const router = express.Router();
-const User = require("../models/user")
+const { User } = require("../models")
 // const userValidate = require("../middlewares/joi")
 const authMiddleware = require("../middlewares/auth-middleware")
 const Joi = require("joi")
@@ -17,6 +17,10 @@ const check = Joi.object({
 // 회원가입
 router.post("/signup", async (req, res)=>{
     try{
+        if(req.cookies.token){
+            res.status(400).send({msg:"이미 로그인한 회원입니다"})
+            return;
+        }
         const { nickname , password , confirm} = await check.validateAsync(req.body);
         console.log(nickname, password)
         if(password !== confirm){
@@ -31,7 +35,7 @@ router.post("/signup", async (req, res)=>{
             })
         }
         // 닉네임이 DB에 있는지 ( 존재하는 유저가 있는지 )
-        const users = await User.findOne({nickname});
+        const users = await User.findOne({where:{nickname}});
         if(users){
             res.status(400).send({
                 errorMessage: '이미 가입된 이메일 또는 닉네임이 있습니다'
@@ -55,12 +59,21 @@ router.post("/signup", async (req, res)=>{
 // 로그인
 router.post("/login", async (req,res)=>{
     try{
+        console.log(req.cookies.token)
+        if(req.cookies.token){
+            res.status(400).send({msg:"이미 로그인한 회원임"})
+            return;
+        }
         // body로 이메일 패스워드를 넘겨줌
         const {nickname, password}=req.body;
-
         // 이메일과 패스워드가 일치하는 사용자가 있는지
-        const user = await User.findOne({nickname, password}).exec();
-        if(!user){
+        const user = await User.findOne({
+            where :{
+            nickname,
+            }
+        });
+        
+        if(!user || password !== user.password){
             res.status(400).send({ // status(401) = 인증 실패라는 뜻의 status 코드
                 errorMessage: '이메일 또는 패스워드가 잘못 되었습니다'
             })
@@ -69,10 +82,10 @@ router.post("/login", async (req,res)=>{
         //쿠키
         const token = jwt.sign({userId: user.userId}, "my-secret-keykey"); // .sign()을 해야 토큰을 만들 수 있음
         console.log(token);
+        res.cookie('token',token)
         // 토큰을 만들었으니 이제 응답
         res.send({
-            token // token이라는 키에다가 JWT 토큰을 반환해야 프론트에서 정상적 동작하도록
-        });
+            token, });// token이라는 키에다가 JWT 토큰을 반환해야 프론트에서 정상적 동작하도록
     }catch(error){
         res.status(400).send({
             errorMessage: "에러 발생"

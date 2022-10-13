@@ -1,10 +1,9 @@
 const express = require("express");
+const cookieParser = require("cookie-parser")
 const app = express();
-const connect = require("./models/index");
 const Router = require("./routes/index");
 
-connect();
-
+app.use(cookieParser())
 app.use(express.json())
 
 app.use(Router)

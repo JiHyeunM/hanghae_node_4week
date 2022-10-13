@@ -1,6 +1,6 @@
 const express = require("express");
 const router = express.Router();
-const Comm = require("../models/comment")
+const{ comments }= require("../models")
 const authMiddleware = require("../middlewares/auth-middleware")
 
 
@@ -10,11 +10,10 @@ router.post("/:postId", authMiddleware, async(req,res)=>{
         const {postId} = req.params;
         const {comment} = req.body;
         const {nickname, userId} = res.locals.user;
-        // console.log(user.nickname, user.userId)
         const createdAt = new Date();
         const updatedAt = new Date();
         if(!comment){res.status(400).send({msg:"댓글 내용을 입력해 주세요"})}
-        else{await Comm.create({postId, userId, nickname, comment, createdAt, updatedAt});
+        else{await comments.create({postId, userId, nickname, comment, createdAt, updatedAt});
                 res.status(201).send({msg:"댓글을 생성하였습니다"})}
     }catch(error){
         console.log(error)
@@ -26,19 +25,19 @@ router.post("/:postId", authMiddleware, async(req,res)=>{
 router.get("/:postId", async(req,res)=>{
     try{
         const {postId} = req.params;
-        const comment = await Comm.find({postId}).sort("-createdAt");
+        const comment = await comments.findAll({where:{postId}},{order: [['createdAt', 'DESC']]})
         // console.log(comment.nickname)
-        const comments = comment.map((com)=>{
+        const commentss = comment.map((com)=>{
             return{
-                commentId:com._id,
+                commentId:com.commentId,
                 userId:com.userId,
                 nickname:com.nickname,
                 comment:com.comment,
                 createdAt:com.createdAt,
-                updatedAt:com.updateAt
+                updatedAt:com.updatedAt
             }
         })
-        res.status(201).json({data:comments})
+        res.status(201).json({data:commentss})
         // console.log(comment)
     }catch(error){
         console.log(error)
@@ -51,10 +50,9 @@ router.put("/:commentId", authMiddleware, async(req,res)=>{
     try{
         const {commentId} = req.params;
         const {comment} = req.body;
-        console.log(commentId, comment)
-        const comments = await Comm.findOne({_id:commentId})
-        if(comments){
-            await Comm.updateOne({_id:commentId}, {$set:{comment}})
+        const commentss = await comments.findOne({where:{commentId:commentId}})
+        if(commentss){
+            await comments.update({comment}, {where:{commentId:commentId}})
             return res.status(201).send({msg:"댓글을 수정하였습니다"})
         }
     }catch(error){
@@ -67,9 +65,9 @@ router.put("/:commentId", authMiddleware, async(req,res)=>{
 router.delete("/:commentId", authMiddleware, async(req,res)=>{
     try{
         const {commentId} = req.params;
-        const comments = await Comm.findOne({_id:commentId})
-        if(comments){
-            await Comm.deleteOne({_id:commentId})
+        const commentss = await comments.findOne({where:{commentId:commentId}})
+        if(commentss){
+            await comments.destroy({where:{commentId:commentId}})
             return res.status(201).send({msg:"댓글을 삭제하였습니다"})
         }
     }catch(error){
