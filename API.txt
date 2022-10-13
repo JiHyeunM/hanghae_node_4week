@@ -1,0 +1,28 @@
+회원 가입 O
+로그인 O
+
+게시글 작성 token  O
+게시글 조회 O
+게시글 상세 조회 O
+게시글 수정 token O
+게시글 삭제 token O
+
+댓글 생성 token O
+댓글 목록 조회 O
+댓글 수정 token
+댓글 삭제 token
+
+좋아요 게시글 조회 token
+게시글 좋아요 token
+
+
+eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2MzQ0NWMxZGI0OWE5YWU0Mjk5ZmE1YjQiLCJpYXQiOjE2NjU0ODc3ODF9.jKslXAv9S-uTW0KMlJjgR1cWbzdVNP7L353Q4_MKCEA
+
+
+
+
+코멘트
+63458a451b34eb9d5e1e597f
+
+포스트
+634568199a3f1dea0c281923
